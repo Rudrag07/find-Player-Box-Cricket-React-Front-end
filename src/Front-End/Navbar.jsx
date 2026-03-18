@@ -111,6 +111,21 @@ const Navbar = () => {
           >
             My Matches
           </Link>
+
+          <Link 
+            to="/PlayerMap" 
+            onClick={() => setIsOpen(false)}
+            className="block px-3 py-3 rounded-md text-base font-bold text-gray-700 hover:bg-green-500 hover:text-white transition-all"
+          >
+            Groups
+          </Link>
+          <Link 
+            to="/FindPlayer" 
+            onClick={() => setIsOpen(false)}
+            className="block px-3 py-3 rounded-md text-base font-bold text-gray-700 hover:bg-green-500 hover:text-white transition-all"
+          >
+            Find
+          </Link>
           
           {/* Mobile Logout Button */}
           <button 
