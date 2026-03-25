@@ -16,19 +16,18 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-slate-50">
-        {/* Navbar hamesha Routes ke bahar rahega taaki har page pe dikhe */}
+        {/* Navbar sab page pe dikhega */}
         <Navbar /> 
         
         <Routes>
+          {/* Ab saare pages visitor dekh sakta hai */}
           <Route path="/" element={<Home />} />
-          <Route path="/matchcard" element={<MatchCard />} />
-          <Route path="/matchform" element={<MatchForm />} />
-          <Route path="/homen" element={<Homen />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          {/* Yahan path ko Navbar ke Link se match karein */}
-          <Route path="/my-matches" element={<MyMatches />} /> 
-          <Route path="/mymatches" element={<MyMatches />} />
+          <Route path="/homen" element={<Homen />} />
+          <Route path="/my-matches" element={<MyMatches />} />
+          <Route path="/matchcard" element={<MatchCard />} />
+          <Route path="/matchform" element={<MatchForm />} />
           <Route path="/Playermap" element={<PlayerMap/>} />
           <Route path="/matchdetails" element={<MatchDetails/>} />
           <Route path="/findplayer" element={<FindPlayer/>} />
