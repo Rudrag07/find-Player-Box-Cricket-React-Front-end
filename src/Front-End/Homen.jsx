@@ -234,25 +234,62 @@ const Homen = () => {
         )}
       </AnimatePresence>
 
-      {/* PAYMENT MODAL */}
-      <AnimatePresence>
-        {showModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <motion.div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center">
-              <h2 className="text-xl font-black italic mb-2">Scan & Pay ₹{selectedMatch?.fee}</h2>
-              <p className="text-[9px] font-black text-slate-400 uppercase mb-6 tracking-widest">Squad Filled! Finalize Payment</p>
-              <div className="bg-slate-50 p-4 rounded-3xl mb-6 inline-block border border-slate-100 shadow-inner">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=8200792488@axl&pn=BoxCricket&am=${selectedMatch?.fee}&cu=INR`} alt="QR" className="w-40 h-40" />
-              </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase mb-6 text-center">UPI ID: 8200792488@axl</p>
-              <form onSubmit={processPayment} className="space-y-3">
-                <button type="submit" className="w-full bg-green-600 text-white font-black py-4 rounded-2xl text-[10px] uppercase shadow-lg active:scale-95 transition-all">I have paid successfully</button>
-                <button type="button" onClick={() => setShowModal(false)} className="w-full text-slate-400 font-bold text-[9px] uppercase tracking-widest">Go Back</button>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+     {/* PAYMENT MODAL - AUTO-AMOUNT & UPI FIXED */}
+<AnimatePresence>
+  {showModal && (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 z-[100]"
+    >
+      <motion.div 
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center shadow-2xl"
+      >
+        <h2 className="text-xl font-black italic mb-2 text-slate-900">Scan & Pay ₹{selectedMatch?.fee}</h2>
+        <p className="text-[9px] font-black text-slate-400 uppercase mb-6 tracking-widest">Final Step: Complete Payment</p>
+        
+        {/* QR CODE BOX */}
+        <div className="bg-white p-4 rounded-3xl mb-6 inline-block border-4 border-slate-50 shadow-xl">
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+              `upi://pay?pa=8200792488@axl&pn=BoxCricket&am=${selectedMatch?.fee?.toString().replace(/[^0-9]/g, '')}&cu=INR`
+            )}`} 
+            alt="QR" 
+            className="w-44 h-44" 
+            onLoad={() => console.log("QR Loaded Successfully")}
+          />
+        </div>
+        
+        <div className="bg-slate-50 p-4 rounded-2xl mb-6 border border-slate-100">
+          <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Paying to</p>
+          <p className="text-xs font-black text-slate-900 tracking-tight">8200792488@axl</p>
+          <div className="mt-2 flex items-center justify-center gap-1 text-green-600">
+            <CheckCircle size={12} />
+            <span className="text-[9px] font-black uppercase">Amount Auto-filled</span>
+          </div>
+        </div>
+
+        <form onSubmit={processPayment} className="space-y-3">
+          <button 
+            type="submit" 
+            className="w-full bg-green-600 text-white font-black py-4 rounded-2xl text-[10px] uppercase shadow-lg shadow-green-200 active:scale-95 transition-all"
+          >
+            I have paid successfully
+          </button>
+          <button 
+            type="button" 
+            onClick={() => setShowModal(false)} 
+            className="w-full text-slate-400 font-bold text-[9px] uppercase tracking-widest py-2"
+          >
+            Go Back
+          </button>
+        </form>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
     </div>
   );
 };

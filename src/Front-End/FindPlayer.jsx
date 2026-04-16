@@ -137,20 +137,47 @@ const FindPlayer = () => {
         </div>
       </div>
 
-      {/* PAYMENT MODAL */}
-      {showPayment && (
-        <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-end">
-          <div className="w-full bg-white rounded-t-[3.5rem] p-10 animate-in slide-in-from-bottom duration-300">
-            <h2 className="text-center font-black uppercase italic text-lg mb-8">Scan QR to Pay</h2>
-            <div className="flex flex-col items-center mb-8 bg-slate-50 p-6 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=8200792488@axl&am=${showPayment.fee}`} className="w-32 h-32 mb-4 rounded-xl shadow-md" />
-              <p className="text-2xl font-black tracking-tighter text-slate-900">₹{showPayment.fee}</p>
-              <p className="text-[9px] text-slate-400 font-black uppercase mt-1 italic">Paying to {showPayment.captainName}</p>
-            </div>
-            <button onClick={() => {setShowPayment(null); setShowReceipt(showPayment);}} className="w-full bg-green-600 text-white py-5 rounded-[2rem] font-black text-[11px] uppercase shadow-xl active:scale-95 transition-all">Confirm Payment</button>
-          </div>
+     {/* PAYMENT MODAL - AUTO-AMOUNT FIXED */}
+{showPayment && (
+  <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-end">
+    <div className="w-full bg-white rounded-t-[3.5rem] p-10 animate-in slide-in-from-bottom duration-300 shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
+      <h2 className="text-center font-black uppercase italic text-lg mb-8 text-slate-900">Scan QR to Pay</h2>
+      
+      <div className="flex flex-col items-center mb-8 bg-slate-50 p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+        <div className="bg-white p-3 rounded-2xl shadow-sm mb-4">
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+              `upi://pay?pa=8200792488@axl&pn=${showPayment.captainName}&am=${showPayment.fee.toString().replace(/[^0-9]/g, '')}&cu=INR`
+            )}`} 
+            className="w-40 h-40" 
+            alt="Payment QR"
+          />
         </div>
-      )}
+        <p className="text-3xl font-black tracking-tighter text-slate-900 italic">₹{showPayment.fee}</p>
+        <div className="mt-2 flex items-center gap-1 text-green-600">
+          <CheckCircle size={12} />
+          <p className="text-[10px] font-black uppercase italic">Amount Auto-filled</p>
+        </div>
+        <p className="text-[9px] text-slate-400 font-bold uppercase mt-2 tracking-widest">To: {showPayment.captainName}</p>
+      </div>
+
+      <div className="space-y-3">
+        <button 
+          onClick={() => {setShowPayment(null); setShowReceipt(showPayment);}} 
+          className="w-full bg-green-600 text-white py-5 rounded-[2rem] font-black text-[11px] uppercase shadow-xl shadow-green-100 active:scale-95 transition-all"
+        >
+          Confirm Payment
+        </button>
+        <button 
+          onClick={() => setShowPayment(null)} 
+          className="w-full text-slate-400 font-black text-[9px] uppercase tracking-widest py-2"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* FINAL RECEIPT MODAL */}
       {showReceipt && (

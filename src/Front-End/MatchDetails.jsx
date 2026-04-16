@@ -33,14 +33,47 @@ const MatchDetails = () => {
     }
   }, []);
 
+  // --- UPDATED DOWNLOAD FUNCTION ---
   const downloadReceipt = async () => {
     const element = receiptRef.current;
-    const canvas = await html2canvas(element, { scale: 3, backgroundColor: '#ffffff', useCORS: true });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    pdf.addImage(imgData, 'PNG', 15, 30, 180, 95);
-    pdf.save(`${matchData.name}_Receipt.pdf`);
-    toast.success("Receipt Downloaded!");
+    
+    // Save original mobile styles
+    const originalWidth = element.style.width;
+    const originalPadding = element.style.padding;
+
+    // Force Desktop layout for capture (Fixes mobile breaking issue)
+    element.style.width = '800px'; 
+    element.style.padding = '40px';
+
+    toast.loading("Generating PDF...");
+
+    try {
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        backgroundColor: '#ffffff', 
+        useCORS: true, // Fixes QR code missing
+        logging: false 
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = 180;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 15, 30, pdfWidth, pdfHeight);
+      pdf.save(`${matchData.name.replace(/\s/g, '_')}_Receipt.pdf`);
+      
+      toast.dismiss();
+      toast.success("Receipt Downloaded!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Download failed!");
+    } finally {
+      // Restore mobile styles immediately
+      element.style.width = originalWidth;
+      element.style.padding = originalPadding;
+    }
   };
 
   const handlePayment = (e) => {
@@ -74,7 +107,6 @@ const MatchDetails = () => {
     <div className="min-h-screen bg-slate-50 pb-24 font-sans text-left">
       <Toaster position="top-center" />
       
-      {/* Header Image - Adjusted height for mobile */}
       <div className="relative h-48 md:h-72 w-full overflow-hidden shadow-2xl">
         <img src="https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover" alt="header" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
@@ -102,7 +134,7 @@ const MatchDetails = () => {
 
           <hr className="border-slate-100 mb-8 md:mb-10" />
 
-          {/* Receipt Section - Optimized for Mobile */}
+          {/* Receipt Section */}
           <div ref={receiptRef} className={`rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 relative overflow-hidden transition-all duration-700 border-2 ${isPaid ? 'bg-white border-green-500 shadow-xl' : 'bg-white border-slate-200'}`}>
              {isPaid && (
                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 opacity-[0.05] md:opacity-[0.08] -rotate-12 pointer-events-none text-7xl md:text-9xl font-black text-green-600">PAID</div>
@@ -130,15 +162,24 @@ const MatchDetails = () => {
                       <p className="text-[9px] md:text-[10px] text-slate-400 uppercase font-black mb-1">Total Amount</p>
                       <p className="text-3xl md:text-4xl font-black text-slate-900">₹{matchData.price}</p>
                     </div>
-                    <div className={`p-2 bg-white rounded-2xl shadow-lg border-2 ${isPaid ? 'border-green-500' : 'grayscale opacity-30'}`}>
-                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${matchData.upiId}&pn=${matchData.name.replace(/\s/g, '%20')}&am=${matchData.price}&cu=INR`} alt="QR" className="w-16 h-16 md:w-20 md:h-20" />
-                    </div>
+                    {/* UPDATED QR CODE TAG */}
+                   {/* QR CODE SECTION - AUTO-FILL AMOUNT & YOUR UPI ID */}
+<div className="p-4 bg-white rounded-3xl shadow-xl border-2 border-slate-200 flex flex-col items-center gap-2">
+  <img 
+    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+      `upi://pay?pa=8200792488@axl&pn=${matchData.name}&am=${matchData.price.replace(',', '')}&cu=INR`
+    )}`} 
+    alt="Scan to Pay" 
+    crossOrigin="anonymous" 
+    className="w-32 h-32 md:w-40 md:h-40" 
+  />
+  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Scan to Pay ₹{matchData.price}</p>
+</div>
                   </div>
                </div>
              </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="mt-8 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
             {!isPaid ? (
                <button onClick={() => setShowPayModal(true)} className="md:col-span-2 bg-green-600 text-white font-black py-4 md:py-5 rounded-2xl md:rounded-[2rem] text-sm uppercase shadow-xl active:scale-95 transition-all">Pay ₹{matchData.price} Now</button>
@@ -152,7 +193,6 @@ const MatchDetails = () => {
         </div>
       </div>
 
-      {/* Modal - Fully Responsive */}
       {showPayModal && (
         <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-white w-full max-w-md rounded-t-[2.5rem] md:rounded-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom md:zoom-in duration-300">
@@ -168,7 +208,6 @@ const MatchDetails = () => {
                   placeholder="yourname@okaxis" 
                   className="w-full bg-slate-100 p-4 rounded-2xl font-bold outline-none border-2 border-transparent focus:border-green-500 focus:bg-white transition-all text-slate-800"
                 />
-                <p className="text-[9px] text-slate-400 mt-2 ml-2 font-bold uppercase italic">Format: username@bankname</p>
               </div>
               
               <button type="submit" className="w-full bg-slate-900 text-white font-black py-4 md:py-5 rounded-2xl uppercase text-xs tracking-widest shadow-lg active:scale-95">Proceed ₹{matchData.price}</button>
@@ -178,7 +217,6 @@ const MatchDetails = () => {
         </div>
       )}
 
-      {/* Navigation Back Button */}
       <button onClick={() => window.history.back()} className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-6 md:translate-x-0 z-50 px-8 md:px-5 py-3 bg-white border border-slate-200 text-slate-700 rounded-full shadow-2xl font-black text-[10px] uppercase">Back</button>
     </div>
   );
